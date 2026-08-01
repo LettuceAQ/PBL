@@ -1,0 +1,8 @@
+[
+  {
+    "topic_id": "topic_01",
+    "title": "赤い帽子をかぶった犬",
+    "reference_image": "img_0001",
+    "required_tags": { "animal": "dog", "item": "hat", "item_color": "red" }
+  }
+]
