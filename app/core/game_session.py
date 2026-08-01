@@ -1,8 +1,7 @@
+import config
+
 class GameSession:
     """1プレイ分の状態（試行回数・現在のお題）を保持する[cite: 1]"""
-    
-    # 最大試行回数は3回
-    MAX_ATTEMPTS: int = 3
     
     def __init__(self, topic: dict) -> None:
         self.topic = topic
@@ -14,8 +13,9 @@ class GameSession:
         
     def is_finished(self) -> bool:
         """最大試行回数に到達したか判定する[cite: 1]"""
-        return self.attempts >= self.MAX_ATTEMPTS
+        # config.py から設定値を読み込む
+        return self.attempts >= config.MAX_ATTEMPTS
         
     def attempts_left(self) -> int:
         """残りの試行回数を返す[cite: 1]"""
-        return self.MAX_ATTEMPTS - self.attempts
+        return config.MAX_ATTEMPTS - self.attempts

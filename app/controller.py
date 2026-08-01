@@ -4,10 +4,7 @@ from app.scenes.topic_scene import TopicScene
 from app.scenes.input_scene import InputScene
 from app.scenes.result_scene import ResultScene
 from app.scenes.end_scene import EndScene
-# ーーー 追加：ローディング画面 ーーー
 from app.scenes.loading_scene import LoadingScene
-#タイマー機能
-from app.core.idle_timer import IdleTimer
 
 from app.core.prompt_analyzer import PromptAnalyzer
 from app.core.keyword_tag_mapper import KeywordTagMapper
@@ -17,6 +14,10 @@ from app.core.image_matcher import ImageMatcher
 from app.repository.topic_repository import TopicRepository
 from app.core.feedback_generator import FeedbackGenerator
 from app.core.game_session import GameSession
+from app.core.idle_timer import IdleTimer
+
+# ーーー 追加：config.py から設定値をインポート ーーー
+import config
 
 class GameController:
     """画面遷移とゲーム全体の進行を統括する[cite: 1]"""
@@ -39,12 +40,13 @@ class GameController:
         self.feedback_gen = FeedbackGenerator(messages_path="data/feedback_messages.json")
         
         self.current_session = None
-
-# ーーー 追加：無操作タイマーの設定 ーーー
-        # テスト用に10秒で設定。タイムアウト時は self.reset() を呼ぶ
-        self.idle_timer = IdleTimer(root=self.root, timeout_sec=10, on_timeout=self.reset)
         
-        self.container = tk.Frame(self.root)
+        # ーーー 変更：config.py の設定値（IDLE_TIMEOUT_SEC）を使用する ーーー
+        self.idle_timer = IdleTimer(
+            root=self.root, 
+            timeout_sec=config.IDLE_TIMEOUT_SEC, 
+            on_timeout=self.reset
+        )
         
         self.container = tk.Frame(self.root)
         self.container.pack(fill="both", expand=True)
@@ -58,7 +60,7 @@ class GameController:
         self.scenes["title"] = TitleScene(self.container, self)
         self.scenes["topic"] = TopicScene(self.container, self)
         self.scenes["input"] = InputScene(self.container, self)
-        self.scenes["loading"] = LoadingScene(self.container, self)  # 追加
+        self.scenes["loading"] = LoadingScene(self.container, self)
         self.scenes["result"] = ResultScene(self.container, self)
         self.scenes["end"] = EndScene(self.container, self)
         
@@ -79,14 +81,10 @@ class GameController:
             scene.tkraise()
             scene.on_show(**kwargs)
 
-    # ーーー 修正：ローディング演出を挟む ーーー
     def handle_submit(self, prompt_text: str) -> None:
-        # まずは画面を「考え中」に切り替える[cite: 1]
         self.next_scene("loading")
-        # 画面の描画を強制的に更新（これをしないとフリーズしているように見えます）
         self.root.update()
         
-        # 裏側で計算を行う
         self.current_session.add_attempt()
         keywords = self.analyzer.extract_keywords(prompt_text)
         tags = self.tag_mapper.map_to_tags(keywords)
@@ -100,8 +98,8 @@ class GameController:
         )
         is_finished = self.current_session.is_finished()
         
-        # 1500ミリ秒（1.5秒）後に、結果画面へ遷移する処理を予約する[cite: 1, 2]
-        self.root.after(1500, lambda: self.next_scene(
+        # ーーー 変更：config.py の設定値（LOADING_DELAY_MS）を使用する ーーー
+        self.root.after(config.LOADING_DELAY_MS, lambda: self.next_scene(
             "result", 
             best_image=best_img, 
             feedbacks=feedbacks,
