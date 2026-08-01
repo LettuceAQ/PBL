@@ -16,13 +16,12 @@ from app.repository.topic_repository import TopicRepository
 from app.core.feedback_generator import FeedbackGenerator
 from app.core.game_session import GameSession
 from app.core.idle_timer import IdleTimer
-from app.core.play_logger import PlayLogger  # 追加
+from app.core.play_logger import PlayLogger
 
-# ーーー 追加：config.py から設定値をインポート ーーー
 import config
 
 class GameController:
-    """画面遷移とゲーム全体の進行を統括する[cite: 1]"""
+    """画面遷移とゲーム全体の進行を統括する"""
     
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
@@ -41,12 +40,11 @@ class GameController:
         self.topic_repo = TopicRepository(topics_path="data/topics.json")
         self.feedback_gen = FeedbackGenerator(messages_path="data/feedback_messages.json")
 
-        # ーーー 追加：プレイロガーの初期化 ーーー
+        # プレイロガーの初期化
         self.logger = PlayLogger()
         
         self.current_session = None
         
-        # ーーー 変更：config.py の設定値（IDLE_TIMEOUT_SEC）を使用する ーーー
         self.idle_timer = IdleTimer(
             root=self.root, 
             timeout_sec=config.IDLE_TIMEOUT_SEC, 
@@ -68,8 +66,6 @@ class GameController:
         self.scenes["loading"] = LoadingScene(self.container, self)
         self.scenes["result"] = ResultScene(self.container, self)
         self.scenes["end"] = EndScene(self.container, self)
-
-        # ーーー 追加：管理者画面の登録 ーーー
         self.scenes["admin"] = AdminScene(self.container, self)
         
         for scene in self.scenes.values():
@@ -79,11 +75,10 @@ class GameController:
         self.next_scene("title")
 
     def start_new_session(self) -> None:
-        """お題を選出し、新しいGameSessionを生成する[cite: 1]"""
-        # ーーー 変更：ランダムにお題を1件選出する ーーー
+        """お題を選出し、新しいGameSessionを生成する"""
         topic = self.topic_repo.get_random_topic()
         self.current_session = GameSession(topic)
-        self.next_scene("topic", topic=topic)  # お題データを画面に渡す
+        self.next_scene("topic", topic=topic)
 
     def next_scene(self, scene_name: str, **kwargs) -> None:
         if scene_name in self.scenes:
@@ -92,39 +87,49 @@ class GameController:
             scene.on_show(**kwargs)
 
     def handle_submit(self, prompt_text: str) -> None:
-        self.next_scene("loading")
-        self.root.update()
-        
-        self.current_session.add_attempt()
-        keywords = self.analyzer.extract_keywords(prompt_text)
-        tags = self.tag_mapper.map_to_tags(keywords)
-        match_result = self.image_matcher.find_best_match(tags)
-        best_img = match_result["best_image"]
-        
-        current_topic = self.current_session.topic
-        feedbacks = self.feedback_gen.generate(
-            required_tags=current_topic["required_tags"], 
-            input_tags=tags
-        )
-        is_finished = self.current_session.is_finished()
+        try:
+            self.next_scene("loading")
+            self.root.update()
+            
+            self.current_session.add_attempt()
+            keywords = self.analyzer.extract_keywords(prompt_text)
+            tags = self.tag_mapper.map_to_tags(keywords)
+            match_result = self.image_matcher.find_best_match(tags)
+            best_img = match_result["best_image"]
+            
+            current_topic = self.current_session.topic
+            feedbacks = self.feedback_gen.generate(
+                required_tags=current_topic["required_tags"], 
+                input_tags=tags
+            )
+            is_finished = self.current_session.is_finished()
 
-        # ーーー 追加：プレイログをCSVに書き込む ーーー
-        self.logger.log_attempt(
-            topic_id=current_topic.get("topic_id"),
-            attempt_count=self.current_session.attempts,
-            prompt=prompt_text,
-            tags=tags,
-            matched_image=best_img.get("file"),
-            feedbacks=feedbacks
-        )
-        
-        # ーーー 変更：config.py の設定値（LOADING_DELAY_MS）を使用する ーーー
-        self.root.after(config.LOADING_DELAY_MS, lambda: self.next_scene(
-            "result", 
-            best_image=best_img, 
-            feedbacks=feedbacks,
-            is_finished=is_finished
-        ))
+            # プレイログをCSVに書き込む
+            self.logger.log_attempt(
+                topic_id=current_topic.get("topic_id"),
+                attempt_count=self.current_session.attempts,
+                prompt=prompt_text,
+                tags=tags,
+                matched_image=best_img.get("file"),
+                feedbacks=feedbacks
+            )
+            
+            self.root.after(config.LOADING_DELAY_MS, lambda: self.next_scene(
+                "result", 
+                best_image=best_img, 
+                feedbacks=feedbacks,
+                is_finished=is_finished
+            ))
+
+        except Exception as e:
+            # 予期せぬエラーが発生した場合のキャッチとログ記録
+            import traceback
+            error_detail = traceback.format_exc()
+            self.logger.log_error("GameController.handle_submit", str(e) + "\n" + error_detail)
+            print(f"エラーが発生しました: {e}")
+            
+            # 安全のため、エラー時はタイトル画面に戻す
+            self.reset()
 
     def reset(self) -> None:
         self.current_session = None
