@@ -1,6 +1,7 @@
 import tkinter as tk
 from app.scenes.base_scene import SceneBase
 import config
+from app.core.play_logger import PlayLogger
 
 class AdminScene(SceneBase):
     """管理者用画面 (SC-99)"""
@@ -8,6 +9,7 @@ class AdminScene(SceneBase):
     def __init__(self, parent: tk.Widget, controller) -> None:
         super().__init__(parent, controller)
         self.configure(bg="#263238")  # 管理画面らしいダークな背景
+        self.logger = PlayLogger()    # ロガーの準備
 
         center_frame = tk.Frame(self, bg="#263238")
         center_frame.pack(expand=True)
@@ -91,12 +93,10 @@ class AdminScene(SceneBase):
 
     def on_show(self, **kwargs) -> None:
         self.focus_set()
-        # 画面を開いたときに、現在のconfigの値を入力欄に反映する
         self.idle_var.set(str(config.IDLE_TIMEOUT_SEC))
         self.attempts_var.set(str(config.MAX_ATTEMPTS))
         self.msg_label.config(text="")
         
-        # ショートカットキーのバインド
         self.bind("<Escape>", lambda e: self._on_back_to_title())
         self.bind("q", lambda e: self._on_exit_app())
 
@@ -108,10 +108,13 @@ class AdminScene(SceneBase):
             if new_idle <= 0 or new_attempts <= 0:
                 raise ValueError()
 
-            # ーーー 変更：設定をファイルに保存して永続化する ーーー
+            # 設定をファイルに保存して永続化
             config.save_config(new_idle, new_attempts)
             
-            self.msg_label.config(text="✔ 設定を保存しました！（次回起動時も維持されます）", fg="#81C784")
+            # ーーー 追加：管理者設定の変更履歴をCSVに記録する ーーー
+            self.logger.log_admin_change(new_idle, new_attempts)
+            
+            self.msg_label.config(text="✔ 設定を保存し、ログに記録しました！", fg="#81C784")
         except ValueError:
             self.msg_label.config(text="⚠ 正しい数値を入力してください", fg="#E57373")
 

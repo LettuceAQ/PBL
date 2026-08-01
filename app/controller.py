@@ -16,6 +16,7 @@ from app.repository.topic_repository import TopicRepository
 from app.core.feedback_generator import FeedbackGenerator
 from app.core.game_session import GameSession
 from app.core.idle_timer import IdleTimer
+from app.core.play_logger import PlayLogger  # 追加
 
 # ーーー 追加：config.py から設定値をインポート ーーー
 import config
@@ -39,6 +40,9 @@ class GameController:
         )
         self.topic_repo = TopicRepository(topics_path="data/topics.json")
         self.feedback_gen = FeedbackGenerator(messages_path="data/feedback_messages.json")
+
+        # ーーー 追加：プレイロガーの初期化 ーーー
+        self.logger = PlayLogger()
         
         self.current_session = None
         
@@ -103,6 +107,16 @@ class GameController:
             input_tags=tags
         )
         is_finished = self.current_session.is_finished()
+
+        # ーーー 追加：プレイログをCSVに書き込む ーーー
+        self.logger.log_attempt(
+            topic_id=current_topic.get("topic_id"),
+            attempt_count=self.current_session.attempts,
+            prompt=prompt_text,
+            tags=tags,
+            matched_image=best_img.get("file"),
+            feedbacks=feedbacks
+        )
         
         # ーーー 変更：config.py の設定値（LOADING_DELAY_MS）を使用する ーーー
         self.root.after(config.LOADING_DELAY_MS, lambda: self.next_scene(
