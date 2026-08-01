@@ -19,5 +19,17 @@
     "reference_image": "img_0003",
     "required_tags": { "animal": "dog", "color": "white", "background": "park" },
     "optional_tags": ["item"]
+  },
+  {
+    "topic_id": "topic_04",
+    "title": "黒いメガネをかけたピンクのウサギ",
+    "reference_image": "img_0005",
+    "required_tags": { 
+      "animal": "rabbit", 
+      "color": "pink", 
+      "item": "glasses", 
+      "item_color": "black" 
+    },
+    "optional_tags": ["background"]
   }
 ]

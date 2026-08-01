@@ -1,5 +1,22 @@
 {
+  "赤":   { "category": "color",  "value": "red" },
+  "青":   { "category": "color",  "value": "blue" },
+  "白":   { "category": "color",  "value": "white" },
+  "黒":   { "category": "color",  "value": "black" },
+  "ピンク": { "category": "color", "value": "pink" },
+  "黄":   { "category": "color",  "value": "yellow" },
+  "緑":   { "category": "color",  "value": "green" },
+  "茶":   { "category": "color",  "value": "brown" },
+  "紫":   { "category": "color",  "value": "purple" },
+  "灰色": { "category": "color",  "value": "gray" },
+
   "犬":   { "category": "animal", "value": "dog" },
   "帽子": { "category": "item",   "value": "hat" },
-  "赤":   { "category": "color",  "value": "red" }
+  "兎":   { "category": "animal", "value": "rabbit" },
+  "猫":   { "category": "animal", "value": "cat" },
+
+  "メガネ": { "category": "item",   "value": "glasses" },
+  "リボン": { "category": "item",   "value": "ribbon" }
+
+
 }
