@@ -8,13 +8,13 @@ class InputScene(SceneBase):
         super().__init__(parent, controller)
         self.configure(bg="#FFF8E7")
 
-        # I-01: フィードバック表示領域（1回目は空、2回目以降で文字が入る想定）[cite: 1]
+        # I-01: フィードバック表示領域
         self.feedback_label = tk.Label(
             self,
             text="", 
             font=("", 24),
             bg="#FFF8E7",
-            fg="#FFB74D" # フィードバック用のオレンジ系[cite: 2]
+            fg="#FFB74D"
         )
         self.feedback_label.pack(pady=(40, 20))
 
@@ -23,7 +23,7 @@ class InputScene(SceneBase):
             self, text="AIに伝える言葉を入力してね", font=("", 24), bg="#FFF8E7"
         ).pack(pady=10)
 
-        # I-02: 自由記述入力欄[cite: 1]
+        # I-02: 自由記述入力欄
         self.entry_var = tk.StringVar()
         self.entry = tk.Entry(
             self,
@@ -35,7 +35,7 @@ class InputScene(SceneBase):
         )
         self.entry.pack(pady=20)
 
-        # I-03: 送信ボタン[cite: 1]
+        # I-03: 送信ボタン
         self.submit_btn = tk.Button(
             self,
             text="送信する (Enter)",
@@ -51,8 +51,10 @@ class InputScene(SceneBase):
         # 画面が表示されたら入力欄を空にして、すぐに入力できるようにフォーカスを当てる
         self.entry_var.set("")
         self.entry.focus_set()
-        # Enterキーでも送信できるようにする
-        self.bind("<Return>", lambda e: self._on_submit())
+        
+        # ーーー 修正箇所 ーーー
+        # self (画面全体) ではなく、self.entry (入力欄自体) にEnterキーを紐付ける
+        self.entry.bind("<Return>", lambda e: self._on_submit())
 
     def _on_submit(self):
         # 入力された文字を取得
@@ -62,7 +64,6 @@ class InputScene(SceneBase):
             self.feedback_label.config(text="なにか書いてみてね！")
             return
             
-        # ーーー 変更箇所 ーーー
         # コントローラーに解析処理をお願いする
         self.controller.handle_submit(input_text)
         
