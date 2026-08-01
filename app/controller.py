@@ -71,9 +71,11 @@ class GameController:
         self.next_scene("title")
 
     def start_new_session(self) -> None:
-        topic = self.topic_repo.get_topic(0)
+        """お題を選出し、新しいGameSessionを生成する[cite: 1]"""
+        # ーーー 変更：ランダムにお題を1件選出する ーーー
+        topic = self.topic_repo.get_random_topic()
         self.current_session = GameSession(topic)
-        self.next_scene("topic")
+        self.next_scene("topic", topic=topic)  # お題データを画面に渡す
 
     def next_scene(self, scene_name: str, **kwargs) -> None:
         if scene_name in self.scenes:

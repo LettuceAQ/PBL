@@ -8,25 +8,36 @@ class InputScene(SceneBase):
         super().__init__(parent, controller)
         self.configure(bg="#FFF8E7")
 
+        # 画面全体の中央に配置するためのコンテナ（weightを使って完全に中央へ寄せます）
+        self.rowconfigure(0, weight=1)
+        self.rowconfigure(2, weight=1)
+        self.columnconfigure(0, weight=1)
+
+        center_frame = tk.Frame(self, bg="#FFF8E7")
+        center_frame.grid(row=1, column=0, sticky="nsew")
+        center_frame.columnconfigure(0, weight=1)
+
         # I-01: フィードバック表示領域
         self.feedback_label = tk.Label(
-            self,
+            center_frame,
             text="", 
             font=("", 24),
             bg="#FFF8E7",
-            fg="#FFB74D"
+            fg="#FFB74D",
+            wraplength=750,
+            justify="center"
         )
-        self.feedback_label.pack(pady=(30, 10))
+        self.feedback_label.pack(pady=(0, 15))
 
         # 案内文
         tk.Label(
-            self, text="AIに伝える言葉を入力してね", font=("", 24), bg="#FFF8E7"
-        ).pack(pady=5)
+            center_frame, text="AIに伝える言葉を入力してね", font=("", 24), bg="#FFF8E7"
+        ).pack(pady=10)
 
         # I-02: 自由記述入力欄
         self.entry_var = tk.StringVar()
         self.entry = tk.Entry(
-            self,
+            center_frame,
             textvariable=self.entry_var,
             font=("", 32),
             width=25,
@@ -36,8 +47,8 @@ class InputScene(SceneBase):
         self.entry.pack(pady=15)
 
         # ボタンを配置するフレーム
-        self.btn_frame = tk.Frame(self, bg="#FFF8E7")
-        self.btn_frame.pack(pady=20)
+        self.btn_frame = tk.Frame(center_frame, bg="#FFF8E7")
+        self.btn_frame.pack(pady=15)
 
         # I-03: 送信ボタン
         self.submit_btn = tk.Button(
@@ -67,13 +78,10 @@ class InputScene(SceneBase):
         self.entry_var.set("")
         self.entry.focus_set()
         
-        # 入力欄でのEnterキーは送信に割り当てる
         self.entry.bind("<Return>", lambda e: self._on_submit())
-        # 画面全体でEscキーが押されたらタイトルに戻るようにする
         self.bind_all("<Escape>", lambda e: self._on_back_to_title())
 
     def on_hide(self) -> None:
-        # 画面が切り替わるときにEscキーのバインドを解除しておく（他の画面への影響を防ぐため）
         try:
             self.unbind_all("<Escape>")
         except Exception:
@@ -85,11 +93,9 @@ class InputScene(SceneBase):
             self.feedback_label.config(text="なにか書いてみてね！")
             return
             
-        # 画面から離れる前にEscの監視を解除
         self.on_hide()
         self.controller.handle_submit(input_text)
 
     def _on_back_to_title(self):
-        # タイトル画面（リセット）に戻る
         self.on_hide()
         self.controller.reset()

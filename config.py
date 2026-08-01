@@ -4,7 +4,7 @@
 """
 
 # 無操作タイムアウトの秒数（テスト中は10秒、本番展示では30秒などに変更可能）
-IDLE_TIMEOUT_SEC = 20
+IDLE_TIMEOUT_SEC = 60
 
 # 1セッションあたりの最大試行回数
 MAX_ATTEMPTS = 2
