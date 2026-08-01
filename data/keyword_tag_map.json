@@ -1,0 +1,5 @@
+{
+  "犬":   { "category": "animal", "value": "dog" },
+  "帽子": { "category": "item",   "value": "hat" },
+  "赤":   { "category": "color",  "value": "red" }
+}

@@ -58,10 +58,12 @@ class InputScene(SceneBase):
         # 入力された文字を取得
         input_text = self.entry_var.get().strip()
         
-        # 空入力のエラー処理 (FR-04, E-001)[cite: 2, 1]
         if not input_text:
             self.feedback_label.config(text="なにか書いてみてね！")
             return
             
-        print(f"送信された文字: {input_text}")
-        self.feedback_label.config(text="（判定画面へ遷移する処理がここに入ります）")
+        # ーーー 変更箇所 ーーー
+        # コントローラーに解析処理をお願いする
+        self.controller.handle_submit(input_text)
+        
+        self.feedback_label.config(text="ターミナルを確認してください！")
