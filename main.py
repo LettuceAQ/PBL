@@ -1,6 +1,7 @@
 import tkinter as tk
 import atexit
 import sys
+import traceback
 from app.controller import GameController
 from app.core.play_logger import PlayLogger
 
@@ -15,7 +16,6 @@ def main():
     # 1. 起動ログの記録
     logger.log_system("START", "アプリケーションが起動しました")
     
-    # 終了フラグ（正常終了かどうかを判定するため）
     is_normal_shutdown = False
 
     def handle_normal_exit():
@@ -24,13 +24,28 @@ def main():
             is_normal_shutdown = True
             logger.log_system("SHUTDOWN", "アプリケーションが正常に終了しました")
 
-    # atexitを使って通常のスクリプト終了時にフックする
     atexit.register(handle_normal_exit)
+
+    # ーーー 予期せぬクラッシュ（未処理の例外）をグローバルにフックする仕組み ーーー
+    def global_exception_handler(exc_type, exc_value, exc_traceback):
+        nonlocal is_normal_shutdown
+        is_normal_shutdown = True
+        
+        # エラー詳細文字列を作成
+        error_msg = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+        
+        # ログファイルに書き込む
+        logger.log_error("Global.Crash", str(exc_value) + "\n" + error_msg)
+        logger.log_system("CRASH", f"予期せぬ例外により異常終了しました: {exc_value}")
+        
+        # 通常のターミナル出力も維持する
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+
+    sys.excepthook = global_exception_handler
 
     controller = GameController(root)
     controller.start()
 
-    # ウィンドウの×ボタンが押されたときのイベントハンドラ
     def on_closing():
         nonlocal is_normal_shutdown
         is_normal_shutdown = True
@@ -39,12 +54,7 @@ def main():
 
     root.protocol("WM_DELETE_WINDOW", on_closing)
 
-    try:
-        root.mainloop()
-    except Exception as e:
-        # メインループ内でキャッチされなかった致命的エラー（強制終了扱い）
-        logger.log_system("CRASH", f"未処理の例外により異常終了しました: {e}")
-        raise e
+    root.mainloop()
 
 if __name__ == "__main__":
     main()
