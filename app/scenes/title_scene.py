@@ -48,6 +48,9 @@ class TitleScene(SceneBase):
         # どのキーが押されても _on_key_press メソッドが呼ばれるようにする
         self.bind("<Any-KeyPress>", self._on_key_press)
 
+        # ーーー 追加：スタッフ用隠しコマンド（F12キーで管理者画面へ） ーーー
+        self.bind("<F12>", lambda e: self.controller.next_scene("admin"))
+
     def _on_key_press(self, event):
         """キーボードが押されたときの処理"""
         # 変更：新しいセッションを開始してお題画面へ

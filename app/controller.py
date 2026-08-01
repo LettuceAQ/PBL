@@ -5,6 +5,7 @@ from app.scenes.input_scene import InputScene
 from app.scenes.result_scene import ResultScene
 from app.scenes.end_scene import EndScene
 from app.scenes.loading_scene import LoadingScene
+from app.scenes.admin_scene import AdminScene
 
 from app.core.prompt_analyzer import PromptAnalyzer
 from app.core.keyword_tag_mapper import KeywordTagMapper
@@ -63,6 +64,9 @@ class GameController:
         self.scenes["loading"] = LoadingScene(self.container, self)
         self.scenes["result"] = ResultScene(self.container, self)
         self.scenes["end"] = EndScene(self.container, self)
+
+        # ーーー 追加：管理者画面の登録 ーーー
+        self.scenes["admin"] = AdminScene(self.container, self)
         
         for scene in self.scenes.values():
             scene.grid(row=0, column=0, sticky="nsew")
