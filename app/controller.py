@@ -6,6 +6,8 @@ from app.scenes.result_scene import ResultScene
 from app.scenes.end_scene import EndScene
 # ーーー 追加：ローディング画面 ーーー
 from app.scenes.loading_scene import LoadingScene
+#タイマー機能
+from app.core.idle_timer import IdleTimer
 
 from app.core.prompt_analyzer import PromptAnalyzer
 from app.core.keyword_tag_mapper import KeywordTagMapper
@@ -37,6 +39,12 @@ class GameController:
         self.feedback_gen = FeedbackGenerator(messages_path="data/feedback_messages.json")
         
         self.current_session = None
+
+# ーーー 追加：無操作タイマーの設定 ーーー
+        # テスト用に10秒で設定。タイムアウト時は self.reset() を呼ぶ
+        self.idle_timer = IdleTimer(root=self.root, timeout_sec=10, on_timeout=self.reset)
+        
+        self.container = tk.Frame(self.root)
         
         self.container = tk.Frame(self.root)
         self.container.pack(fill="both", expand=True)
