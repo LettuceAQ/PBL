@@ -6,7 +6,7 @@ def main():
     root = tk.Tk()
     root.title("AIに伝われ！〜SEのおしごと体験〜")
     
-    # 画面サイズの設定（いったん800x600のウィンドウモードで起動します）
+    # 画面サイズの設定
     root.geometry("800x600")
     
     # GameControllerを呼び出して開始

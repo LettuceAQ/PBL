@@ -50,5 +50,5 @@ class TitleScene(SceneBase):
 
     def _on_key_press(self, event):
         """キーボードが押されたときの処理"""
-        # キーが押されたらお題画面へ遷移する[cite: 1]
-        self.controller.next_scene("topic")
+        # 変更：新しいセッションを開始してお題画面へ
+        self.controller.start_new_session()
