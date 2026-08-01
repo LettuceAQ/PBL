@@ -1,3 +1,7 @@
+import os
+import csv
+import json
+import sys
 import tkinter as tk
 from app.scenes.title_scene import TitleScene
 from app.scenes.topic_scene import TopicScene
@@ -25,22 +29,35 @@ class GameController:
     
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
-        
+
+# 実行ファイルの場所（または起動時のカレントディレクトリ）を基準にする
+        if getattr(sys, 'frozen', False):
+            base_dir = os.path.dirname(sys.executable)
+        else:
+            base_dir = os.getcwd()
+
+        synonyms_path = os.path.join(base_dir, "data", "synonyms.json")
+        map_path = os.path.join(base_dir, "data", "keyword_tag_map.json")
+        tags_path = os.path.join(base_dir, "data", "tags.json")
+        topics_path = os.path.join(base_dir, "data", "topics.json")
+        feedback_path = os.path.join(base_dir, "data", "feedback_messages.json")
+
         self.analyzer = PromptAnalyzer()
         self.tag_mapper = KeywordTagMapper(
-            synonyms_path="data/synonyms.json",
-            map_path="data/keyword_tag_map.json"
+            synonyms_path=synonyms_path,
+            map_path=map_path
         )
-        self.image_repo = ImageRepository(tags_path="data/tags.json")
+        self.image_repo = ImageRepository(tags_path=tags_path)
         self.score_calc = ScoreCalculator()
         self.image_matcher = ImageMatcher(
             images_data=self.image_repo.load_all(),
             calculator=self.score_calc
         )
-        self.topic_repo = TopicRepository(topics_path="data/topics.json")
-        self.feedback_gen = FeedbackGenerator(messages_path="data/feedback_messages.json")
+        self.topic_repo = TopicRepository(topics_path=topics_path)
+        self.feedback_gen = FeedbackGenerator(messages_path=feedback_path)
 
         # プレイロガーの初期化
+        log_dir = os.path.join(base_dir, "logs")
         self.logger = PlayLogger()
         
         self.current_session = None

@@ -1,0 +1,4 @@
+{
+    "idle_timeout_sec": 60,
+    "max_attempts": 3
+}

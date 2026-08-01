@@ -4,8 +4,14 @@ JSONファイルと連携し、変更内容を永続化します。
 """
 import json
 import os
+import sys
 
-CONFIG_FILE = "data/config.json"
+if getattr(sys, 'frozen', False):
+    base_dir = os.path.dirname(sys.executable)
+else:
+    base_dir = os.getcwd()
+
+CONFIG_FILE = os.path.join(base_dir, "data", "config.json")
 
 # デフォルト値
 IDLE_TIMEOUT_SEC = 30

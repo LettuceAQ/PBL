@@ -1,0 +1,17 @@
+[
+  {
+    "id": "img_0001",
+    "file": "img_0001.png",
+    "tags": { "animal": "dog", "color": "brown", "item": "hat", "item_color": "red", "background": "none" }
+  },
+  {
+    "id": "img_0002",
+    "file": "img_0002.png",
+    "tags": { "animal": "cat", "color": "white", "item": "ribbon", "item_color": "blue", "background": "room" }
+  },
+  {
+    "id": "img_0003",
+    "file": "img_0003.png",
+    "tags": { "animal": "dog", "color": "white", "item": "none", "item_color": "none", "background": "park" }
+  }
+]
