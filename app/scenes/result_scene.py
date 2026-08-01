@@ -10,11 +10,11 @@ class ResultScene(SceneBase):
         super().__init__(parent, controller)
         self.configure(bg="#FFF8E7")
 
-        # R-01: 選出画像表示領域（高さを6に縮小して縦のスペースを確保）
+        # R-01: 選出画像表示領域
         self.image_label = tk.Label(self, bg="#FFF8E7")
         self.image_label.pack(pady=(10, 5))
 
-        # R-03: フィードバック文表示領域（フォントサイズを20ptに調整）
+        # R-03: フィードバック文表示領域
         self.feedback_label = tk.Label(
             self, text="", font=("", 20, "bold"), bg="#FFF8E7", fg="#FFB74D",
             wraplength=750, justify="center"
@@ -24,16 +24,19 @@ class ResultScene(SceneBase):
         self.btn_frame = tk.Frame(self, bg="#FFF8E7")
         self.btn_frame.pack(pady=(5, 10))
 
-        # R-04: もう一度挑戦するボタン
+        # R-04: もう一度挑戦するボタン (Enterキー対応)
         self.retry_btn = tk.Button(
-            self.btn_frame, text="もう一度挑戦する (Enter)", font=("", 22, "bold"),
+            self.btn_frame, text="もう一度挑戦する [Enter]", font=("", 20, "bold"),
             bg="#29B6F6", fg="white", width=22, command=self._on_retry
         )
-        # R-05: おわる（終了する）ボタン
+        self.retry_btn.pack(side="left", padx=10)
+        
+        # R-05: おわる（終了する）ボタン (Escキー対応)
         self.end_btn = tk.Button(
-            self.btn_frame, text="次へ進む (Enter)", font=("", 22, "bold"),
-            bg="#FF9800", fg="white", width=22, command=self._on_end
+            self.btn_frame, text="おわる [Esc]", font=("", 20, "bold"),
+            bg="#FF9800", fg="white", width=18, command=self._on_end
         )
+        self.end_btn.pack(side="left", padx=10)
         
         self.current_photo = None
 
@@ -49,7 +52,6 @@ class ResultScene(SceneBase):
             img_path = os.path.join("data", "images", img_filename)
             if os.path.exists(img_path):
                 pil_image = Image.open(img_path)
-                # 画像サイズも少しコンパクトに調整 (300x300)
                 pil_image = pil_image.resize((300, 300))
                 self.current_photo = ImageTk.PhotoImage(pil_image)
                 self.image_label.config(image=self.current_photo, text="")
@@ -60,13 +62,19 @@ class ResultScene(SceneBase):
         self.feedback_label.config(text=feedback_text)
         
         if self.is_finished:
+            # 3回目（上限到達）のときはリトライを消し、「おわる」をEnterキーで押せるようにする
             self.retry_btn.pack_forget()
-            self.end_btn.pack(side="left", padx=10)
+            self.end_btn.config(text="次へ進む [Enter]")
             self.bind("<Return>", lambda e: self._on_end())
         else:
-            self.end_btn.pack_forget()
-            self.retry_btn.pack(side="left", padx=10)
+            # 1・2回目のときは両方表示し、Enterでリトライ、Escで「おわる」にする
+            if not self.retry_btn.winfo_ismapped():
+                self.retry_btn.pack(side="left", padx=10)
+            self.end_btn.config(text="おわる [Esc]")
+            
+            # キーの割り当て
             self.bind("<Return>", lambda e: self._on_retry())
+            self.bind("<Escape>", lambda e: self._on_end()) # ここを <space> から <Escape> に変更
 
     def _on_retry(self):
         self.controller.next_scene("input")

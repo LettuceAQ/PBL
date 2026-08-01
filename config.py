@@ -10,6 +10,7 @@ IDLE_TIMEOUT_SEC = 20
 MAX_ATTEMPTS = 2
 
 # 判定中のローディング演出の時間（ミリ秒）
+# 1300ms = 1.3秒
 LOADING_DELAY_MS = 1300
 
 # 画面のデフォルトサイズ
