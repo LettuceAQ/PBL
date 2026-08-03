@@ -153,24 +153,31 @@ class GameController:
 
     def apply_settings(self) -> None:
         """config.pyの設定内容をウィンドウ全体に適用する"""
-        # 1. フルスクリーン状態の適用
-        self.root.attributes("-fullscreen", config.IS_FULLSCREEN)
+        # 1. フルスクリーン設定を適用
+        is_fs = getattr(config, "IS_FULLSCREEN", False)
+        self.root.attributes("-fullscreen", is_fs)
         
-        if not config.IS_FULLSCREEN:
-            # ウィンドウモードの場合、UI Scale に応じてウィンドウサイズをスケーリング
+        # 2. ウィンドウモードのときだけ、倍率に応じたサイズ変更を行う
+        if not is_fs:
             base_w = getattr(config, "BASE_WINDOW_WIDTH", 800)
             base_h = getattr(config, "BASE_WINDOW_HEIGHT", 600)
             
             scaled_w = int(base_w * config.UI_SCALE)
             scaled_h = int(base_h * config.UI_SCALE)
             
+            # フルスクリーンを解除した状態で確実にサイズを反映させる
             self.root.geometry(f"{scaled_w}x{scaled_h}")
+            self.root.update_idletasks()
 
-        # 2. Tkinter全体のスケーリング倍率（UI Scale）を反映
+        # 3. UIスケーリングの適用
         try:
             self.root.tk.call('tk', 'scaling', 1.0 * config.UI_SCALE)
         except Exception:
             pass
+
+        # 4. 設定が「フルスクリーン有効」であれば、改めてフルスクリーンを適用する
+        if config.IS_FULLSCREEN:
+            self.root.attributes("-fullscreen", True)
 
     def reset(self) -> None:
         self.current_session = None

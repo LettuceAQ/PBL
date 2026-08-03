@@ -109,7 +109,7 @@ class AdminScene(SceneBase):
         self.time_limit_entry = tk.Entry(frame, font=("", 13), width=10)
         self.time_limit_entry.pack(anchor="w", padx=30)
 
-        # ローディング演出の待ち時間（秒） ※ゲーム設定タブへ移動
+        # ローディング演出の待ち時間（秒）
         tk.Label(frame, text="ローディング演出時間 (秒):", font=("", 13), bg="#34495E", fg="white").pack(anchor="w", padx=30, pady=(10, 2))
         self.loading_delay_entry = tk.Entry(frame, font=("", 13), width=10)
         self.loading_delay_entry.pack(anchor="w", padx=30)
@@ -188,7 +188,6 @@ class AdminScene(SceneBase):
         self.time_limit_entry.delete(0, tk.END)
         self.time_limit_entry.insert(0, str(getattr(config, "TIME_LIMIT_SEC", 60)))
 
-        # ミリ秒を秒に変換して表示
         delay_sec = getattr(config, "LOADING_DELAY_MS", 1500) / 1000.0
         self.loading_delay_entry.delete(0, tk.END)
         self.loading_delay_entry.insert(0, str(delay_sec))
@@ -235,8 +234,9 @@ class AdminScene(SceneBase):
                 debug_mode=new_debug_mode
             )
 
-            # ウィンドウのフルスクリーン状態を即時反映
-            self.controller.root.attributes("-fullscreen", new_fullscreen)
+            # ーーー★ ここでGameControllerのapply_settings()を呼び出して即時反映させる ★ーーー
+            if hasattr(self.controller, "apply_settings"):
+                self.controller.apply_settings()
 
             # ログに残す
             self.logger.log_admin_change(new_idle, new_max)
