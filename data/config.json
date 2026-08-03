@@ -3,11 +3,11 @@
     "max_attempts": 2,
     "master_volume": 80,
     "se_volume": 100,
-    "theme": "dark",
+    "theme": "light",
     "enable_timer": true,
     "time_limit_sec": 60,
     "loading_delay_ms": 1500,
     "ui_scale": 1.5,
-    "is_fullscreen": true,
+    "is_fullscreen": false,
     "debug_mode": false
 }
