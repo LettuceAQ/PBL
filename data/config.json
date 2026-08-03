@@ -1,4 +1,7 @@
 {
     "idle_timeout_sec": 60,
-    "max_attempts": 1
+    "max_attempts": 2,
+    "master_volume": 80,
+    "se_volume": 100,
+    "theme": "light"
 }

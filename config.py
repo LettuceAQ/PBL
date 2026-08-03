@@ -16,6 +16,9 @@ CONFIG_FILE = os.path.join(base_dir, "data", "config.json")
 # デフォルト値
 IDLE_TIMEOUT_SEC = 30
 MAX_ATTEMPTS = 3
+MASTER_VOLUME = 80
+SE_VOLUME = 100
+THEME = "light"
 
 # 画面のデフォルトサイズや演出時間（これらはコード側で固定管理）
 LOADING_DELAY_MS = 1500
@@ -31,26 +34,35 @@ COLOR_FEEDBACK = "#FFB74D"    # フィードバック文字色
 
 def load_config() -> None:
     """起動時にJSONファイルから設定を読み込む"""
-    global IDLE_TIMEOUT_SEC, MAX_ATTEMPTS
+    global IDLE_TIMEOUT_SEC, MAX_ATTEMPTS, MASTER_VOLUME, SE_VOLUME, THEME
     if os.path.exists(CONFIG_FILE):
         try:
             with open(CONFIG_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 IDLE_TIMEOUT_SEC = data.get("idle_timeout_sec", IDLE_TIMEOUT_SEC)
                 MAX_ATTEMPTS = data.get("max_attempts", MAX_ATTEMPTS)
+                MASTER_VOLUME = data.get("master_volume", MASTER_VOLUME)
+                SE_VOLUME = data.get("se_volume", SE_VOLUME)
+                THEME = data.get("theme", THEME)
         except Exception as e:
             print(f"設定ファイルの読み込みに失敗しました: {e}")
 
 
-def save_config(idle_sec: int, max_attempts: int) -> None:
+def save_config(idle_sec: int, max_attempts: int, master_vol: int, se_vol: int, theme: str) -> None:
     """設定をメモリ上に反映し、JSONファイルに保存する"""
-    global IDLE_TIMEOUT_SEC, MAX_ATTEMPTS
+    global IDLE_TIMEOUT_SEC, MAX_ATTEMPTS, MASTER_VOLUME, SE_VOLUME, THEME
     IDLE_TIMEOUT_SEC = idle_sec
     MAX_ATTEMPTS = max_attempts
+    MASTER_VOLUME = master_vol
+    SE_VOLUME = se_vol
+    THEME = theme
     
     data = {
         "idle_timeout_sec": IDLE_TIMEOUT_SEC,
-        "max_attempts": MAX_ATTEMPTS
+        "max_attempts": MAX_ATTEMPTS,
+        "master_volume": MASTER_VOLUME,
+        "se_volume": SE_VOLUME,
+        "theme": THEME
     }
     try:
         os.makedirs(os.path.dirname(CONFIG_FILE), exist_ok=True)
@@ -61,4 +73,4 @@ def save_config(idle_sec: int, max_attempts: int) -> None:
 
 
 # モジュール読み込み時に自動で設定をロードする
-load_config()            
+load_config()

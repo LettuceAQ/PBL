@@ -1,125 +1,170 @@
 import tkinter as tk
+from tkinter import ttk
 from app.scenes.base_scene import SceneBase
-import config
 from app.core.play_logger import PlayLogger
+import config
+import sys
+import os
 
 class AdminScene(SceneBase):
-    """管理者用画面 (SC-99)"""
+    """管理者設定画面 (SC-06) - タブ化されたゲーム風オプション"""
     
     def __init__(self, parent: tk.Widget, controller) -> None:
         super().__init__(parent, controller)
-        self.configure(bg="#263238")  # 管理画面らしいダークな背景
-        self.logger = PlayLogger()    # ロガーの準備
+        self.configure(bg="#2C3E50") # 少し落ち着いたゲーム風のダークトーン背景
 
-        center_frame = tk.Frame(self, bg="#263238")
-        center_frame.pack(expand=True)
+        self.logger = PlayLogger()
 
-        # タイトル
-        tk.Label(
-            center_frame,
-            text="【管理者メニュー（設定変更）】",
-            font=("", 26, "bold"),
-            bg="#263238",
-            fg="#ECEFF1"
-        ).pack(pady=(0, 20))
+        # タイトルヘッダー
+        header_label = tk.Label(
+            self, text="⚙ OPTIONS / 管理者設定", 
+            font=("", 24, "bold"), bg="#2C3E50", fg="#ECF0F1"
+        )
+        header_label.pack(pady=(20, 10))
 
-        # --- 設定変更用の入力フレーム ---
-        form_frame = tk.Frame(center_frame, bg="#263238")
-        form_frame.pack(pady=10)
+        # ーーー ノートブック（タブ）の作成 ーーー
+        style = ttk.Style()
+        style.theme_use('clam')
+        style.configure('TNotebook', background='#2C3E50', borderwidth=0)
+        style.configure('TNotebook.Tab', font=('', 14, 'bold'), padding=[15, 8])
 
-        # 1. タイムアウト秒数の設定
-        tk.Label(
-            form_frame, text="無操作タイムアウト (秒):", font=("", 18), bg="#263238", fg="#CFD8DC"
-        ).grid(row=0, column=0, sticky="w", pady=8, padx=10)
+        self.notebook = ttk.Notebook(self)
+        self.notebook.pack(fill="both", expand=True, padx=30, pady=10)
+
+        # 各タブ用のフレーム
+        self.tab_game = tk.Frame(self.notebook, bg="#34495E")
+        self.tab_audio = tk.Frame(self.notebook, bg="#34495E")
+        self.tab_theme = tk.Frame(self.notebook, bg="#34495E")
+
+        self.notebook.add(self.tab_game, text=" 🎮 ゲーム設定 ")
+        self.notebook.add(self.tab_audio, text=" 🔊 オーディオ ")
+        self.notebook.add(self.tab_theme, text=" 🎨 外観・テーマ ")
+
+        # 各タブの中身をビルド
+        self._build_game_tab()
+        self._build_audio_tab()
+        self._build_theme_tab()
+
+        # ーーー アプリ内メッセージ表示ラベル ーーー
+        self.status_label = tk.Label(
+            self, text="", font=("", 12, "bold"), bg="#2C3E50", fg="#2ECC71"
+        )
+        self.status_label.pack(pady=(0, 5))
+
+        # ーーー 画面下部の共通操作ボタンエリア ーーー
+        btn_frame = tk.Frame(self, bg="#2C3E50")
+        btn_frame.pack(fill="x", padx=30, pady=(0, 20))
+
+        save_btn = tk.Button(
+            btn_frame, text="設定を保存 [Enter]", font=("", 16, "bold"),
+            bg="#27AE60", fg="white", width=16, command=self._save_settings
+        )
+        save_btn.pack(side="left", padx=5)
+
+        back_btn = tk.Button(
+            btn_frame, text="タイトルへ戻る [Esc]", font=("", 16, "bold"),
+            bg="#7F8C8D", fg="white", width=16, command=self._back_to_title
+        )
+        back_btn.pack(side="left", padx=5)
+
+        exit_app_btn = tk.Button(
+            btn_frame, text="アプリ終了 [Q]", font=("", 16, "bold"),
+            bg="#C0392B", fg="white", width=14, command=self._exit_app
+        )
+        exit_app_btn.pack(side="right", padx=5)
+
+        # キーバインド
+        self.bind("<Escape>", lambda e: self._back_to_title())
+        self.bind("<Return>", lambda e: self._save_settings())
+        self.bind("q", lambda e: self._exit_app())
+        self.bind("Q", lambda e: self._exit_app())
+
+    def _build_game_tab(self) -> None:
+        """ゲームプレイに関する設定タブ"""
+        frame = self.tab_game
         
-        self.idle_var = tk.StringVar()
-        self.idle_entry = tk.Entry(form_frame, textvariable=self.idle_var, font=("", 18), width=8)
-        self.idle_entry.grid(row=0, column=1, pady=8, padx=10)
+        tk.Label(frame, text="放置タイムアウト秒数 (秒):", font=("", 14), bg="#34495E", fg="white").pack(anchor="w", padx=30, pady=(30, 5))
+        self.idle_entry = tk.Entry(frame, font=("", 14), width=10)
+        self.idle_entry.pack(anchor="w", padx=30)
+        tk.Label(frame, text="※無操作がこの秒数続くと自動でタイトル画面に戻ります。", font=("", 10), bg="#34495E", fg="#BDC3C7").pack(anchor="w", padx=30, pady=(2, 15))
 
-        # 2. 最大試行回数の設定
-        tk.Label(
-            form_frame, text="最大試行回数 (回):", font=("", 18), bg="#263238", fg="#CFD8DC"
-        ).grid(row=1, column=0, sticky="w", pady=8, padx=10)
+        tk.Label(frame, text="最大試行回数 (回):", font=("", 14), bg="#34495E", fg="white").pack(anchor="w", padx=30, pady=(10, 5))
+        self.max_attempt_entry = tk.Entry(frame, font=("", 14), width=10)
+        self.max_attempt_entry.pack(anchor="w", padx=30)
+
+    def _build_audio_tab(self) -> None:
+        """音声・効果音に関する設定タブ"""
+        frame = self.tab_audio
         
-        self.attempts_var = tk.StringVar()
-        self.attempts_entry = tk.Entry(form_frame, textvariable=self.attempts_var, font=("", 18), width=8)
-        self.attempts_entry.grid(row=1, column=1, pady=8, padx=10)
+        tk.Label(frame, text="マスター音量:", font=("", 14), bg="#34495E", fg="white").pack(anchor="w", padx=30, pady=(30, 5))
+        self.master_vol_slider = tk.Scale(frame, from_=0, to=100, orient="horizontal", bg="#34495E", fg="white", highlightbackground="#34495E", length=300)
+        self.master_vol_slider.pack(anchor="w", padx=30)
 
-        # 適用ボタン
-        self.apply_btn = tk.Button(
-            center_frame,
-            text="設定を保存して適用する",
-            font=("", 18, "bold"),
-            bg="#4CAF50",
-            fg="white",
-            width=22,
-            command=self._on_apply_config
-        )
-        self.apply_btn.pack(pady=15)
+        tk.Label(frame, text="SE (効果音) 音量:", font=("", 14), bg="#34495E", fg="white").pack(anchor="w", padx=30, pady=(20, 5))
+        self.se_vol_slider = tk.Scale(frame, from_=0, to=100, orient="horizontal", bg="#34495E", fg="white", highlightbackground="#34495E", length=300)
+        self.se_vol_slider.pack(anchor="w", padx=30)
 
-        # メッセージ表示用
-        self.msg_label = tk.Label(
-            center_frame, text="", font=("", 16), bg="#263238", fg="#81C784"
-        )
-        self.msg_label.pack(pady=5)
-
-        # --- 操作ボタン用のフレーム ---
-        btn_frame = tk.Frame(center_frame, bg="#263238")
-        btn_frame.pack(pady=15)
-
-        # 強制リセット（タイトルに戻る）ボタン
-        self.reset_btn = tk.Button(
-            btn_frame,
-            text="タイトルに戻る [Esc]",
-            font=("", 18, "bold"),
-            bg="#EF5350",
-            fg="white",
-            width=18,
-            command=self._on_back_to_title
-        )
-        self.reset_btn.pack(side="left", padx=10)
-
-        # アプリ終了ボタン
-        self.exit_btn = tk.Button(
-            btn_frame,
-            text="アプリを終了 [Q]",
-            font=("", 18, "bold"),
-            bg="#78909C",
-            fg="white",
-            width=16,
-            command=self._on_exit_app
-        )
-        self.exit_btn.pack(side="left", padx=10)
+    def _build_theme_tab(self) -> None:
+        """外観・カラーに関する設定タブ"""
+        frame = self.tab_theme
+        
+        tk.Label(frame, text="UI カラーテーマ:", font=("", 14), bg="#34495E", fg="white").pack(anchor="w", padx=30, pady=(30, 5))
+        
+        self.theme_var = tk.StringVar(value="light")
+        tk.Radiobutton(frame, text="ライトテーマ (温かみのある標準)", variable=self.theme_var, value="light", font=("", 12), bg="#34495E", fg="white", selectcolor="#2C3E50").pack(anchor="w", padx=50, pady=5)
+        tk.Radiobutton(frame, text="ダークテーマ (目に優しい暗色)", variable=self.theme_var, value="dark", font=("", 12), bg="#34495E", fg="white", selectcolor="#2C3E50").pack(anchor="w", padx=50, pady=5)
 
     def on_show(self, **kwargs) -> None:
         self.focus_set()
-        self.idle_var.set(str(config.IDLE_TIMEOUT_SEC))
-        self.attempts_var.set(str(config.MAX_ATTEMPTS))
-        self.msg_label.config(text="")
-        
-        self.bind("<Escape>", lambda e: self._on_back_to_title())
-        self.bind("q", lambda e: self._on_exit_app())
+        # 画面を開くたびにステータスをクリア
+        self.status_label.config(text="")
 
-    def _on_apply_config(self):
+        # 現在の設定値を各入力コンポーネントに反映
+        self.idle_entry.delete(0, tk.END)
+        self.idle_entry.insert(0, str(config.IDLE_TIMEOUT_SEC))
+
+        self.max_attempt_entry.delete(0, tk.END)
+        self.max_attempt_entry.insert(0, str(config.MAX_ATTEMPTS))
+
+        self.master_vol_slider.set(config.MASTER_VOLUME)
+        self.se_vol_slider.set(config.SE_VOLUME)
+        self.theme_var.set(config.THEME)
+
+    def _save_settings(self) -> None:
         try:
-            new_idle = int(self.idle_var.get())
-            new_attempts = int(self.attempts_var.get())
+            new_idle = int(self.idle_entry.get())
+            new_max = int(self.max_attempt_entry.get())
             
-            if new_idle <= 0 or new_attempts <= 0:
-                raise ValueError()
+            if new_idle <= 0 or new_max <= 0:
+                raise ValueError("数値は1以上を指定してください。")
 
-            # 設定をファイルに保存して永続化
-            config.save_config(new_idle, new_attempts)
-            
-            # ーーー 追加：管理者設定の変更履歴をCSVに記録する ーーー
-            self.logger.log_admin_change(new_idle, new_attempts)
-            
-            self.msg_label.config(text="✔ 設定を保存し、ログに記録しました！", fg="#81C784")
-        except ValueError:
-            self.msg_label.config(text="⚠ 正しい数値を入力してください", fg="#E57373")
+            new_master = self.master_vol_slider.get()
+            new_se = self.se_vol_slider.get()
+            new_theme = self.theme_var.get()
 
-    def _on_back_to_title(self):
-        self.controller.reset()
+            # config.py の save_config 関数を使って一括保存・更新
+            config.save_config(new_idle, new_max, new_master, new_se, new_theme)
 
-    def _on_exit_app(self):
-        self.controller.root.destroy()
+            # ログに残す
+            self.logger.log_admin_change(new_idle, new_max)
+
+            # ポップアップを出さず、アプリ内に成功メッセージを表示する
+            self.status_label.config(
+                text="✔ 設定を正常に保存しました！", 
+                fg="#2ECC71"
+            )
+
+        except ValueError as e:
+            self.status_label.config(
+                text=f"✖ 入力エラー: 正しい数値を入力してください ({e})", 
+                fg="#E74C3C"
+            )
+
+    def _back_to_title(self) -> None:
+        self.controller.next_scene("title")
+
+    def _exit_app(self) -> None:
+        from tkinter import messagebox
+        if messagebox.askyesno("確認", "アプリケーションを終了しますか？"):
+            self.logger.log_system("SHUTDOWN", "管理者画面から終了されました")
+            self.controller.root.destroy()
