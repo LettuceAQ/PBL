@@ -58,7 +58,6 @@ class TitleScene(SceneBase):
         # 3. Enterキーとスペースキーを許可
         self.bind("<Return>", self._on_valid_key_press)
         self.bind("<space>", self._on_valid_key_press)
-        self.bind("<backspace>", self._on_valid_key_press)
 
         # 4. スタッフ用隠しコマンド（F12キーで管理者画面へ）
         self.bind("<F12>", lambda e: self.controller.next_scene("admin"))

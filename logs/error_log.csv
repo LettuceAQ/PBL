@@ -1,1 +1,20 @@
 ﻿timestamp,location,error_message
+2026-08-03 15:32:10,Global.Crash,"bad event type or keysym ""backspace""
+Traceback (most recent call last):
+  File ""C:\Users\kmyut\Desktop\PBLproject\PBL\main.py"", line 68, in <module>
+    main()
+  File ""C:\Users\kmyut\Desktop\PBLproject\PBL\main.py"", line 55, in main
+    controller.start()
+  File ""C:\Users\kmyut\Desktop\PBLproject\PBL\app\controller.py"", line 92, in start
+    self.next_scene(""title"")
+  File ""C:\Users\kmyut\Desktop\PBLproject\PBL\app\controller.py"", line 104, in next_scene
+    scene.on_show(**kwargs)
+  File ""C:\Users\kmyut\Desktop\PBLproject\PBL\app\scenes\title_scene.py"", line 61, in on_show
+    self.bind(""<backspace>"", self._on_valid_key_press)
+  File ""C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\tkinter\__init__.py"", line 1451, in bind
+    return self._bind(('bind', self._w), sequence, func, add)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\tkinter\__init__.py"", line 1405, in _bind
+    self.tk.call(what + (sequence, cmd))
+_tkinter.TclError: bad event type or keysym ""backspace""
+"
