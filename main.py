@@ -1,11 +1,24 @@
 import tkinter as tk
+from tkinter import messagebox
 import atexit
 import sys
 import traceback
+
 from app.controller import GameController
 from app.core.play_logger import PlayLogger
+from app.core.health_checker import HealthChecker  # 追加
 
 def main():
+    # 1. 起動前の環境自己診断（ヘルスチェック）
+    is_ok, error_msg = HealthChecker.check_environment()
+    if not is_ok:
+        # Tkのルートがまだないので一時的なウィンドウを作ってエラーを出す
+        temp_root = tk.Tk()
+        temp_root.withdraw()
+        messagebox.showerror("起動エラー (環境チェック失敗)", error_msg)
+        temp_root.destroy()
+        sys.exit(1)
+
     root = tk.Tk()
     root.title("AIに伝われ！〜SEのおしごと体験〜")
     root.geometry("800x600")
@@ -13,7 +26,7 @@ def main():
     # ロガーの準備
     logger = PlayLogger()
     
-    # 1. 起動ログの記録
+    # 2. 起動ログの記録
     logger.log_system("START", "アプリケーションが起動しました")
     
     is_normal_shutdown = False
@@ -26,19 +39,14 @@ def main():
 
     atexit.register(handle_normal_exit)
 
-    # ーーー 予期せぬクラッシュ（未処理の例外）をグローバルにフックする仕組み ーーー
     def global_exception_handler(exc_type, exc_value, exc_traceback):
         nonlocal is_normal_shutdown
         is_normal_shutdown = True
         
-        # エラー詳細文字列を作成
         error_msg = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
-        
-        # ログファイルに書き込む
         logger.log_error("Global.Crash", str(exc_value) + "\n" + error_msg)
         logger.log_system("CRASH", f"予期せぬ例外により異常終了しました: {exc_value}")
         
-        # 通常のターミナル出力も維持する
         sys.__excepthook__(exc_type, exc_value, exc_traceback)
 
     sys.excepthook = global_exception_handler
