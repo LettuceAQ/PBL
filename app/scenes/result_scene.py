@@ -1,6 +1,7 @@
 import tkinter as tk
 from app.scenes.base_scene import SceneBase
 from PIL import Image, ImageTk
+import config
 import os
 
 class ResultScene(SceneBase):
@@ -43,6 +44,13 @@ class ResultScene(SceneBase):
     def on_show(self, **kwargs) -> None:
         self.focus_set()
         
+        # --- テーマカラーの適用 ---
+        colors = config.get_theme_colors()
+        self.configure(bg=colors["bg"])
+        self.btn_frame.config(bg=colors["bg"])
+        self.feedback_label.config(bg=colors["bg"], fg=colors.get("accent", "#FFB74D"))
+        # ------------------------
+        
         best_img = kwargs.get("best_image", {})
         feedbacks = kwargs.get("feedbacks", [])
         self.is_finished = kwargs.get("is_finished", False)
@@ -54,9 +62,9 @@ class ResultScene(SceneBase):
                 pil_image = Image.open(img_path)
                 pil_image = pil_image.resize((300, 300))
                 self.current_photo = ImageTk.PhotoImage(pil_image)
-                self.image_label.config(image=self.current_photo, text="")
+                self.image_label.config(image=self.current_photo, text="", bg=colors["bg"])
             else:
-                self.image_label.config(image='', text="[画像が見つかりません]", font=("", 20))
+                self.image_label.config(image='', text="[画像が見つかりません]", font=("", 20), bg=colors["card_bg"], fg=colors["fg"])
         
         feedback_text = "\n\n".join(feedbacks)
         self.feedback_label.config(text=feedback_text)

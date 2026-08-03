@@ -107,5 +107,25 @@ def save_config(
         print(f"設定ファイルの保存に失敗しました: {e}")
 
 
+def get_theme_colors() -> dict:
+    """現在のテーマに応じたカラーセットを返す"""
+    if THEME == "dark":
+        return {
+            "bg": "#2C3E50",         # 背景（ダーク）
+            "fg": "#ECF0F1",         # メイン文字色（白っぽい）
+            "primary": "#E67E22",    # 強調カラー（オレンジ系）
+            "secondary": "#BDC3C7",  # サブ文字・枠線など
+            "card_bg": "#34495E"     # パーツやプレースホルダーの背景
+        }
+    else:
+        return {
+            "bg": "#FFF8E7",         # 背景（クリーム色）
+            "fg": "#333333",         # メイン文字色（黒っぽい）
+            "primary": "#FF9800",    # 強調カラー（オレンジ）
+            "secondary": "#666666",  # サブ文字・枠線など
+            "card_bg": "lightgray"   # パーツやプレースホルダーの背景
+        }
+
+
 # モジュール読み込み時に自動で設定をロードする
 load_config()

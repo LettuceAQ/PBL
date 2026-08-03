@@ -30,7 +30,10 @@ class GameController:
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
 
-# 実行ファイルの場所（または起動時のカレントディレクトリ）を基準にする
+        # 起動時に設定（フルスクリーンや画面倍率）を適用
+        self.apply_settings()
+
+        # 実行ファイルの場所（または起動時のカレントディレクトリ）を基準にする
         if getattr(sys, 'frozen', False):
             base_dir = os.path.dirname(sys.executable)
         else:
@@ -147,6 +150,27 @@ class GameController:
             
             # 安全のため、エラー時はタイトル画面に戻す
             self.reset()
+
+    def apply_settings(self) -> None:
+        """config.pyの設定内容をウィンドウ全体に適用する"""
+        # 1. フルスクリーン状態の適用
+        self.root.attributes("-fullscreen", config.IS_FULLSCREEN)
+        
+        if not config.IS_FULLSCREEN:
+            # ウィンドウモードの場合、UI Scale に応じてウィンドウサイズをスケーリング
+            base_w = getattr(config, "BASE_WINDOW_WIDTH", 800)
+            base_h = getattr(config, "BASE_WINDOW_HEIGHT", 600)
+            
+            scaled_w = int(base_w * config.UI_SCALE)
+            scaled_h = int(base_h * config.UI_SCALE)
+            
+            self.root.geometry(f"{scaled_w}x{scaled_h}")
+
+        # 2. Tkinter全体のスケーリング倍率（UI Scale）を反映
+        try:
+            self.root.tk.call('tk', 'scaling', 1.0 * config.UI_SCALE)
+        except Exception:
+            pass
 
     def reset(self) -> None:
         self.current_session = None
