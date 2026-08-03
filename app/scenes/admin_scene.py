@@ -70,11 +70,18 @@ class AdminScene(SceneBase):
         )
         back_btn.pack(side="left", padx=5)
 
+        # 右側のボタンエリア（アプリ終了の左側に「アプリ再起動」を配置）
         exit_app_btn = tk.Button(
             btn_frame, text="アプリ終了 [Q]", font=("", 16, "bold"),
             bg="#C0392B", fg="white", width=14, command=self._exit_app
         )
         exit_app_btn.pack(side="right", padx=5)
+
+        restart_btn = tk.Button(
+            btn_frame, text="アプリ再起動", font=("", 16, "bold"),
+            bg="#D35400", fg="white", width=14, command=self._restart_app
+        )
+        restart_btn.pack(side="right", padx=5)
 
         # キーバインド
         self.bind("<Escape>", lambda e: self._back_to_title())
@@ -234,7 +241,7 @@ class AdminScene(SceneBase):
                 debug_mode=new_debug_mode
             )
 
-            # ーーー★ ここでGameControllerのapply_settings()を呼び出して即時反映させる ★ーーー
+            # 即時反映
             if hasattr(self.controller, "apply_settings"):
                 self.controller.apply_settings()
 
@@ -269,6 +276,15 @@ class AdminScene(SceneBase):
 
     def _back_to_title(self) -> None:
         self.controller.next_scene("title")
+
+    def _restart_app(self) -> None:
+        """アプリケーションを再起動する"""
+        from tkinter import messagebox
+        if messagebox.askyesno("確認", "アプリケーションを再起動しますか？"):
+            # ログに「再起動ボタンによって再起動されたこと」を明記して記録
+            self.logger.log_system("RESTART_BY_BUTTON", "管理者画面の再起動ボタンによりアプリケーションが再起動されました")
+            python = sys.executable
+            os.execl(python, python, *sys.argv)
 
     def _exit_app(self) -> None:
         from tkinter import messagebox
