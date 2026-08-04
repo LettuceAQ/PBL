@@ -3,7 +3,7 @@
     "max_attempts": 2,
     "master_volume": 80,
     "se_volume": 100,
-    "theme": "light",
+    "theme": "dark",
     "enable_timer": true,
     "time_limit_sec": 60,
     "loading_delay_ms": 1500,

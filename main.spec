@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('C:/Users/kmyut/AppData/Local/Packages/PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0/LocalCache/local-packages/Python312/site-packages/janome/sysdic', 'janome/sysdic')],
+    datas=[('C:/Users/kmyut/AppData/Local/Packages/PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0/LocalCache/local-packages/Python312/site-packages/janome/sysdic', 'janome/sysdic'), ('data', 'data')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

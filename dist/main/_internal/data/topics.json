@@ -1,0 +1,35 @@
+[
+  {
+    "topic_id": "topic_01",
+    "title": "赤い帽子をかぶった犬",
+    "reference_image": "img_0001",
+    "required_tags": { "animal": "dog", "item": "hat", "item_color": "red" },
+    "optional_tags": ["color", "background"]
+  },
+  {
+    "topic_id": "topic_02",
+    "title": "青いリボンをつけた白い猫",
+    "reference_image": "img_0002",
+    "required_tags": { "animal": "cat", "color": "white", "item": "ribbon", "item_color": "blue" },
+    "optional_tags": ["background"]
+  },
+  {
+    "topic_id": "topic_03",
+    "title": "公園にいる白い犬",
+    "reference_image": "img_0003",
+    "required_tags": { "animal": "dog", "color": "white", "background": "park" },
+    "optional_tags": ["item"]
+  },
+  {
+    "topic_id": "topic_04",
+    "title": "黒いメガネをかけたピンクのウサギ",
+    "reference_image": "img_0005",
+    "required_tags": { 
+      "animal": "rabbit", 
+      "color": "pink", 
+      "item": "glasses", 
+      "item_color": "black" 
+    },
+    "optional_tags": ["background"]
+  }
+]
